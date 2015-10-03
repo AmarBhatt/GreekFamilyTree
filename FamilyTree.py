@@ -87,7 +87,22 @@ class Card:
         t.write(lname, align="center", font=("Overpass", 20, "normal"))
 
     def drawFlag(self):
-        t.goto(0,0)
+        thick=10
+        t.penup()
+        v1 = (self.base_x-(self.width/2), self.base_y)
+        newDiff = thick/tan(radians(90-self.tilt))
+        v2 = (v1[0]-newDiff, v1[1]+thick)
+        v3 = (v1[0]+newDiff, v1[1]+thick)
+        v4 = v1
+        self.quadPoly(v1, v2, v3, v4, "#003050")
+        thick = 20
+        newDiff = thick/tan(radians(90-self.tilt))
+        v1 = v2
+        v2 = (v1[0]+newDiff, v2[1]+thick)
+        v3 = (v2[0]+40, v2[1])
+        v4 = (v1[0]+40, v1[1])
+        self.quadPoly(v1, v2, v3, v4, "red")
+
 
     def quadPoly(self, v1, v2, v3, v4, fillcolor):
         t.penup()
@@ -245,6 +260,7 @@ mybox.setTextColor("white")
 mybox.setTilt(30)
 mybox.drawCard()
 mybox.drawName(r60)
+mybox.drawFlag()
 
 ## Save ##
 #t.getscreen().getcanvas().postscript(file = "t1.eps")
