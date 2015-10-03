@@ -33,10 +33,13 @@ class Card:
     def setTextColor(self, color):
         self.textColor = color
 
-    def drawCard(self):
+    def drawCard(self, brother):
         self.drawBG()
         self.drawOutline()
         self.drawShadow()
+        mybox.drawName(brother)
+        mybox.drawFlag()
+        mybox.drawPledgeClass(brother)
 
     def drawBG(self):
         v1 = (self.base_x-(self.width/2), self.base_y)
@@ -101,7 +104,21 @@ class Card:
         v2 = (v1[0]+newDiff, v2[1]+thick)
         v3 = (v2[0]+40, v2[1])
         v4 = (v1[0]+40, v1[1])
-        self.quadPoly(v1, v2, v3, v4, "red")
+        self.quadPoly(v1, v2, v3, v4, "#003050")
+
+    def drawPledgeClass(self, brother):
+        t.color("white")
+        letter1 = chr(ord("\u0390") + divmod(brother.pledgeClass,24)[0])
+        letter2 = chr(ord("\u0390") + divmod(brother.pledgeClass,24)[1])
+        if brother.pledgeClass == 0:
+            letter1 = chr(ord("\u0390") + 25)
+            letter2 = "C"
+        greek_char = letter1 + letter2
+        if ord(letter1) == 912:
+            greek_char = letter2
+
+        t.goto(self.base_x-(self.width/2)+20, self.base_y+11)
+        t.write(greek_char,align="center",font=("Ariel", 15, "normal"))
 
 
     def quadPoly(self, v1, v2, v3, v4, fillcolor):
@@ -124,50 +141,6 @@ def setRoot():
     t.hideturtle()
     t.speed(0)
     t.penup()
-    t.goto(0, 150)
-    t.left(90)
-
-def drawPledgeClass( pledgeClass, width, outline ):
-    t.back(outline)
-    t.right(90)
-    t.forward((width/2) - (width/6) + outline)
-    t.color("#d7d2cb")
-    t.begin_fill()
-    t.pendown()
-    t.forward(width/6)
-    t.left(90)
-    t.forward(width/6)
-    t.left(135)
-    t.forward((width/6)*(sqrt(2)))
-    t.end_fill()
-    t.penup()
-
-    t.left(135)
-    t.forward(17)
-    greek_char = chr(ord("\u0390") + pledgeClass)
-    t.color("black")
-    if pledgeClass == 0:
-        greek_char = "C"
-    t.write(greek_char, font=("Ariel", 15, "normal"))
-
-    t.left(90)
-    t.forward(outline)
-    t.right(90)
-    t.back(17)
-    t.back((width/2) - (width/6) + outline)
-    t.left(90)
-
-def inputNameText(name, color):
-    parts = name.split(' ')
-
-    t.penup()
-    t.color(color)
-
-    t.forward(26)
-    t.write(parts[0]+" "+parts[1], align="center", font=("Overpass", 20, "normal"))
-    t.back(20)
-    t.write(parts[2], align="center", font=("Overpass", 20, "normal"))
-    t.back(6) 
 
 def drawHead(x, y1, y2, width=5, color="#003050"):
     thk = width/2
@@ -229,38 +202,13 @@ r67 = Brother(4,4,0,0,1,7,67,"Tim Doores")
 t4 = [r4, r33, r40, r49, r43, r56, r60, r76, r67]
 
 
-# for b in t4:
-#     base = (b.column*((boxwidth/2)+10), 150-((boxheight+70)*b.row))
-#     t.goto(base)
-
-#     boxColor = "#00a0df"
-#     textColor = "white"
-#     if b.active == 0:
-#         boxColor = "white"
-#         textColor = "black"
-#     drawNameBlock(boxwidth, boxheight, outline, boxColor, "#003050", b.pledgeClass)
-#     inputNameText(str(b.roll) + " " + b.name, textColor)
-    
-#     t.goto(base)
-#     drawTail(t.xcor(), t.ycor()-6, t.ycor()-30)
-#     t.goto(base)
-#     if b.row != 0:
-#         topY=t.ycor()+boxheight+outline
-#         drawHead(t.xcor(), topY, topY+30)
-#         if b.column != b.bigColumn:
-#             t.goto(base)
-#             t.goto(t.xcor(),topY+30)
-#             drawArm(t.xcor(), b.bigColumn*((boxwidth/2)+10), t.ycor())
-
 
 ## new test ##
 mybox = Card((0,150), 180, 60)
 mybox.setColor("#00a0df")
 mybox.setTextColor("white")
 mybox.setTilt(30)
-mybox.drawCard()
-mybox.drawName(r60)
-mybox.drawFlag()
+mybox.drawCard(r4)
 
 ## Save ##
 #t.getscreen().getcanvas().postscript(file = "t1.eps")
