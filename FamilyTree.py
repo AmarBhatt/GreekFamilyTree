@@ -3,13 +3,13 @@ from math import sqrt, tan, radians
 
 ## Classes ##
 class Brother:
-    def __init__(self, t, row, center, lineTo, active, pledgeClass, roll, name):
+    def __init__(self, tree, row, column, bigColumn, active, pledgeClass, roll, name):
+        self.tree = tree
         self.roll = roll
         self.name = name
-        self.t = t
         self.row = row
-        self.center = center
-        self.lineTo = lineTo
+        self.column = column
+        self.bigColumn = bigColumn
         self.active = active
         self.pledgeClass = pledgeClass
 
@@ -20,6 +20,7 @@ class Card:
         self.width = width
         self.height = height
         self.setColor("none")
+        self.setTextColor("black")
         self.setTilt(0)
 
     def setColor(self, fill):
@@ -28,6 +29,9 @@ class Card:
     def setTilt(self, tilt):
         self.tilt = tilt
         self.tiltDiff = self.height/tan(radians(90-self.tilt))
+
+    def setTextColor(self, color):
+        self.textColor = color
 
     def drawCard(self):
         self.drawBG()
@@ -70,6 +74,20 @@ class Card:
         v3 = (v2[0]+newDiff, v2[1]-thick)
         v4 = (v1[0]+newDiff, v1[1]-thick)
         self.quadPoly(v1, v2, v3, v4, self.fillcolor)
+
+    def drawName(self, brother):
+        fname = brother.name.split(' ')[0]
+        lname = brother.name.split(' ')[1]
+
+        t.penup()
+        t.color(self.textColor)
+        t.goto(self.base_x + 30, self.base_y + 26)
+        t.write(str(brother.roll)+" "+fname, align="center", font=("Overpass", 20, "normal"))
+        t.goto(self.base_x + 30, self.base_y + 6)
+        t.write(lname, align="center", font=("Overpass", 20, "normal"))
+
+    def drawFlag(self):
+        t.goto(0,0)
 
     def quadPoly(self, v1, v2, v3, v4, fillcolor):
         t.penup()
@@ -197,7 +215,7 @@ t4 = [r4, r33, r40, r49, r43, r56, r60, r76, r67]
 
 
 # for b in t4:
-#     base = (b.center*((boxwidth/2)+10), 150-((boxheight+70)*b.row))
+#     base = (b.column*((boxwidth/2)+10), 150-((boxheight+70)*b.row))
 #     t.goto(base)
 
 #     boxColor = "#00a0df"
@@ -214,18 +232,19 @@ t4 = [r4, r33, r40, r49, r43, r56, r60, r76, r67]
 #     if b.row != 0:
 #         topY=t.ycor()+boxheight+outline
 #         drawHead(t.xcor(), topY, topY+30)
-#         if b.center != b.lineTo:
+#         if b.column != b.bigColumn:
 #             t.goto(base)
 #             t.goto(t.xcor(),topY+30)
-#             drawArm(t.xcor(), b.lineTo*((boxwidth/2)+10), t.ycor())
+#             drawArm(t.xcor(), b.bigColumn*((boxwidth/2)+10), t.ycor())
 
 
 ## new test ##
 mybox = Card((0,150), 180, 60)
 mybox.setColor("#00a0df")
+mybox.setTextColor("white")
 mybox.setTilt(30)
 mybox.drawCard()
-
+mybox.drawName(r60)
 
 ## Save ##
 #t.getscreen().getcanvas().postscript(file = "t1.eps")
