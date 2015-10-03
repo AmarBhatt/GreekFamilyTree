@@ -3,14 +3,14 @@ from math import sqrt, tan, radians
 
 ## Classes ##
 class Brother:
-    def __init__(self, tree, row, column, bigColumn, active, pledgeClass, roll, name):
+    def __init__(self, tree, row, column, bigColumn, status, pledgeClass, roll, name):
         self.tree = tree
         self.roll = roll
         self.name = name
         self.row = row
         self.column = column
         self.bigColumn = bigColumn
-        self.active = active
+        self.status = status
         self.pledgeClass = pledgeClass
 
 class Card:
@@ -184,12 +184,6 @@ def drawArm(x1, x2, y, width=5, color="#003050"):
 ## ---------------------------- ##
 
 ## Execute ##
-t = turtle.Turtle()
-setRoot()
-boxwidth = 180
-boxheight = 60
-outline = 5
-
 r4 = Brother(4,0,0,0,0,0,4,"Nick Pillon")
 r33 = Brother(4,1,0,0,0,0,33,"Chad Rossi")
 r40 = Brother(4,2,-2,0,0,3,40,"Vinay Kaushik")
@@ -201,20 +195,26 @@ r76 = Brother(4,3,4,2,0,8,76,"Rahul Sharma")
 r67 = Brother(4,4,0,0,1,7,67,"Tim Doores")
 t4 = [r4, r33, r40, r49, r43, r56, r60, r76, r67]
 
+t = turtle.Turtle()
+setRoot()
+distX = 110
+distY = 110
 
+for b in t4:
+    mybox = Card((b.column*distX,150-(b.row*distY)), 180, 60)
+    if b.status == 1:
+        mybox.setColor("#00a0df")
+        mybox.setTextColor("white")
+    else:
+        mybox.setColor("white")
+        mybox.setTextColor("black")
+        
+    mybox.setTilt(30)
+    mybox.drawCard(b)
 
-## new test ##
-mybox = Card((0,150), 180, 60)
-mybox.setColor("#00a0df")
-mybox.setTextColor("white")
-mybox.setTilt(30)
-mybox.drawCard(r4)
 
 ## Save ##
 #t.getscreen().getcanvas().postscript(file = "t1.eps")
-
-
-
 
 ## END ##
 turtle.done()
