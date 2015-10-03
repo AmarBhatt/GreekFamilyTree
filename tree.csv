@@ -1,83 +1,1 @@
-Number,Name,Big
-28,Kevin Granger,Bill Moore
-35,Thomas Waldschmidt,Devin Blau
-38,"Peter Ryan, Jr.",Taylor Gosselin
-42,Grant Scheynost,Thomas Waldschmidt
-43,Ken Postel,Vinay Kaushik
-44,Josh Landman,Shaun Cimini
-45,Matt Bernstein,Kevin Granger
-46,Luther Heigl,Bill Moore
-47,Alex Skinner,Tyler Pixley
-49,James Buxton,Chad Rossi
-50,Juan Lachapelle,Greg Ekström
-52,Andrew Merriman,Kevin Granger
-54,Ian Pasternak,Jake Manley
-55,Michael Lutfring,Derek Pixley
-56,Michael Yaeger,James Buxton
-58,Timothy Koski,Andrew Taylor
-59,Ben Zenker,Matt Bernstein
-60,Riley Miskewitz,James Buxton
-61,Pat Furrey,Alex Skinner
-62,Matt Crawford,Andrew Taylor
-66,Max Maurin,Ian Pasternak
-67,Tim Doores,Michael Yaeger
-68,Anthony Giallella,Luther Heigl
-69,Michael Carter,Juan Lachapelle
-70,Farid Barquet,Justin Fogarty
-71,Ariel Tejada,Michael Lutfring
-72,Nick DeGirolamo,Thomas Waldschmidt
-73,Andrew Ward,Alex Skinner
-74,Aaron Starr,Greg Ekström
-75,Austin Reynolds,Andrew Merriman
-77,Christopher Caulfield,Thomas Waldschmidt
-78,Amar Bhatt,Michael Lutfring
-79,Josh Carroll,Michael Carter
-80,Justin Eng,Max Maurin
-81,Andrew Hill,Ben Zenker
-0,Andrew Taylor,
-1,Brendan Larrabee,
-2,TJ Leadens,
-3,Mario Castillo,
-4,Nick Pillon,
-5,Alex Nilsen,
-6,Clayton Smith,
-7,Nate Pfister,
-8,Shaun Cimini,
-9,Jared Lagermasini,
-10,Tyler Pixley,
-11,Jake Snyder,
-12,Kevin Petrella,
-14,Jake Manley,Brendan Larrabee
-15,Bill Moore,Jake Snyder
-16,Devin Blau,Jared Lagermasini
-17,Cory Castle,Clayton Smith
-18,Min Ho Kim,Kevin Petrella
-21,Michael Swanson,TJ Leadens
-22,Stephen Severance,Craig Sweet
-24,Nick DeCoste,Devin Blau
-25,Jason Batcheller,Stephen Severance
-27,Jeremy Pitzeruse,TJ Leadens
-29,Taylor Gosselin,Alex Nilsen
-33,Chad Rossi,Nick Pillon
-34,Mackenzie Willard,Jeremy Pitzeruse
-36,Greg Ekström,Jason Batcheller
-37,Cory Sweet,Cory Castle
-39,Derek Pixley,Tyler Pixley
-41,Brian Matteson,Mackenzie Willard
-51,Lucas Lo Re,Min Ho Kim
-57,Justin Fogarty,Cory Sweet
-13,Craig Sweet,
-19,Dave Spires,Shaun Cimini
-20,Naveen George,Tyler Pixely
-23,Jake Raymond,Cory Castle
-26,Peter Dimou,Michael Swanson
-30,Naomi Kimmey,Shaun Cimini
-31,Alex Mikolajko,Jeremy Pitzeruse
-32,Atharva Sabnis,Jake Raymond
-48,Andrew Deck,Jeremy Pitzeruse
-63,Andy Lee,Ken Postel
-64,Jonathan Kozak,Grant Scheynost
-40,Vinay Kaushik,Chad Rossi
-53,Mateo Diz,"Peter Ryan, Jr."
-65,Dakota Reukauf,Thomas Waldschmidt
-76,Rahul Sharma,James Buxton
+Number,Name,Big28,Kevin Granger,Bill Moore35,Thomas Waldschmidt,Devin Blau38,"Peter Ryan, Jr.",Taylor Gosselin42,Grant Scheynost,Thomas Waldschmidt43,Ken Postel,Vinay Kaushik44,Josh Landman,Shaun Cimini45,Matt Bernstein,Kevin Granger46,Luther Heigl,Bill Moore47,Alex Skinner,Tyler Pixley49,James Buxton,Chad Rossi50,Juan Lachapelle,Greg Ekstršm52,Andrew Merriman,Kevin Granger54,Ian Pasternak,Jake Manley55,Michael Lutfring,Derek Pixley56,Michael Yaeger,James Buxton58,Timothy Koski,Andrew Taylor59,Ben Zenker,Matt Bernstein60,Riley Miskewitz,James Buxton61,Pat Furrey,Alex Skinner62,Matt Crawford,Andrew Taylor66,Max Maurin,Ian Pasternak67,Tim Doores,Michael Yaeger68,Anthony Giallella,Luther Heigl69,Michael Carter,Juan Lachapelle70,Farid Barquet,Justin Fogarty71,Ariel Tejada,Michael Lutfring72,Nick DeGirolamo,Thomas Waldschmidt73,Andrew Ward,Alex Skinner74,Aaron Starr,Greg Ekstršm75,Austin Reynolds,Andrew Merriman77,Christopher Caulfield,Thomas Waldschmidt78,Amar Bhatt,Michael Lutfring79,Josh Carroll,Michael Carter80,Justin Eng,Max Maurin81,Andrew Hill,Ben Zenker0,Andrew Taylor,1,Brendan Larrabee,2,TJ Leadens,3,Mario Castillo,4,Nick Pillon,5,Alex Nilsen,6,Clayton Smith,7,Nate Pfister,8,Shaun Cimini,9,Jared Lagermasini,10,Tyler Pixley,11,Jake Snyder,12,Kevin Petrella,14,Jake Manley,Brendan Larrabee15,Bill Moore,Jake Snyder16,Devin Blau,Jared Lagermasini17,Cory Castle,Clayton Smith18,Min Ho Kim,Kevin Petrella21,Michael Swanson,TJ Leadens22,Stephen Severance,Craig Sweet24,Nick DeCoste,Devin Blau25,Jason Batcheller,Stephen Severance27,Jeremy Pitzeruse,TJ Leadens29,Taylor Gosselin,Alex Nilsen33,Chad Rossi,Nick Pillon34,Mackenzie Willard,Jeremy Pitzeruse36,Greg Ekstršm,Jason Batcheller37,Cory Sweet,Cory Castle39,Derek Pixley,Tyler Pixley41,Brian Matteson,Mackenzie Willard51,Lucas Lo Re,Min Ho Kim57,Justin Fogarty,Cory Sweet13,Craig Sweet,19,Dave Spires,Shaun Cimini20,Naveen George,Tyler Pixely23,Jake Raymond,Cory Castle26,Peter Dimou,Michael Swanson30,Naomi Kimmey,Shaun Cimini31,Alex Mikolajko,Jeremy Pitzeruse32,Atharva Sabnis,Jake Raymond48,Andrew Deck,Jeremy Pitzeruse63,Andy Lee,Ken Postel64,Jonathan Kozak,Grant Scheynost40,Vinay Kaushik,Chad Rossi53,Mateo Diz,"Peter Ryan, Jr."65,Dakota Reukauf,Thomas Waldschmidt76,Rahul Sharma,James Buxton
