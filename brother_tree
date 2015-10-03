@@ -1,0 +1,12 @@
+class node:
+    number
+    little=[]
+
+
+raw = open('tree.csv','r')
+
+for line in raw:
+    print(line.split(str=","))
+
+
+    
