@@ -64,19 +64,19 @@ Parameters: Roll - STRING - file name of roll csv
 '''
 def readRoll(Roll):
     with open(Roll, newline='') as csvfile: # open file
-        reader = csv.reader(csvfile, delimiter=',') # Split comma seperated values
+        reader = csv.reader(csvfile, delimiter='\t') # Split comma seperated values
         count = 0 
         nodeList = []
         for row in reader:
             if count != 0: # skip first row for column headers
                 if (not row[0][0] in filterOutMember):
                      row[2] = setStatus.get(row[2]) #set status of member
-                     if(row[5] == ""): # if empty string then no Big present for member
-                         row[5] = -1;
-                     n = member(row[6],int(row[5]),row[2],row[6],int(row[0]),row[1]) #create object
+                     if(row[15] == "N/A"): # if empty string then no Big present for member
+                         row[15] = -1;
+                     n = member(row[5],int(row[15]),row[2],row[7],int(row[0]),row[1]) #create object
                      #set dictionary look ups
                      memberLookup[int(row[0])] = n
-                     memberDict[int(row[0])]=int(row[5])
+                     memberDict[int(row[0])]=int(row[15])
                      n.toString()
             count = count + 1 #just to skip first one
 
@@ -114,7 +114,6 @@ def populateTree(n):
         n.child.append(c)
         populateTree(c)
         
-    
 '''
 printTree(NODE)
 
@@ -128,6 +127,9 @@ def printTree(n):
         return
     for c in n.child:
         printTree(c)
+
+
+
 '''
 main()
 
@@ -137,7 +139,7 @@ Parameters: NONE
 
 '''   
 def main():
-    readRoll('Roll - Brothers.csv')
+    readRoll('Roll - Brothers.tsv')
     print(memberLookup)
     count = 1
     for h in getHeads():
