@@ -1,4 +1,7 @@
 import csv
+from FamilyTree import *
+import operator
+from math import floor
 
 ## Classes ##
 '''
@@ -47,13 +50,28 @@ class node:
 
 filterOutMember = ['S','D'] #Filter list for Sweethearts (Sx) and Dogs (Dx)
 
-setStatus = {"Active":0,"Alumni":1,"Disassociated":2, "Transferred/ Left School":1} #status dictionary
+setStatus = {"Active":1,"Alumni":0,"Disassociated":2, "Transferred/ Left School":1} #status dictionary
 
 memberLookup = {} #dictionary mapping roll number to member object
 
 nodeList = [] #List of nodes (trees)
 
 memberDict = {} #dictionary mapping littles to bigs by roll number
+
+colonyMap = {"Colony":0,
+"Alpha":1,
+"Beta":2,
+"Gamma":3,
+"Delta":4,
+"Epsilon":5,
+"Zeta":6,
+"Eta":7,
+"Theta":8,
+"Iota":9,
+"Kappa":10,
+"Georgia Tech":0}
+
+brotherList = [];
 
 '''
 readRoll(STRING)
@@ -128,7 +146,30 @@ def printTree(n):
     for c in n.child:
         printTree(c)
 
+'''
+formatTree(NODE, INTEGER)
 
+Formats tree for printing
+
+Parameters: Node to format, INTEGER tree number, INTEGER current row
+'''  
+def formatTree(n,t,row,column,bigColumn):
+    #tree, row, column, bigColumn, status, pledgeClass, roll, name
+    #r4 = Brother(4,0,0,0,0,0,4,"Nick Pillon")
+    #Head of tree always starts in center
+    m = memberLookup.get(n.data)
+    #if(m.bigRoll != -1):
+        #column = column + (floor(len(n.child)/2))*2
+    b = Brother(t,row,column,bigColumn,m.status,colonyMap.get(m.pledgeClass),m.roll,m.name)
+    brotherList.append(b)
+    bigColumn = column
+    #label each based on number of children
+    for c in n.child:
+        col = n.child.index(c)*2-(len(n.child)-1) + bigColumn
+        formatTree(c, t, row+1, col, bigColumn)
+    return brotherList;
+
+              
 
 '''
 main()
@@ -142,11 +183,18 @@ def main():
     readRoll('Roll - Brothers.tsv')
     print(memberLookup)
     count = 1
+    global brotherList
     for h in getHeads():
         populateTree(h)
         print("Tree ",count,": ",memberLookup.get(h.data).name)
         printTree(h)
         print()
+        brotherList = [];
+        brotherList = formatTree(h,count,0,0,0);
+        brotherList.sort(key=operator.attrgetter('row'))
+        print("Printing Tree: ",count);
+        print(brotherList);
+        printTreeGraphic(brotherList);
         count+=1
                 
 

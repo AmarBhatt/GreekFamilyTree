@@ -136,6 +136,9 @@ class Card:
         t.penup() 
 
 
+
+
+
 ## Functions ##
 def setRoot():
     t.hideturtle()
@@ -183,7 +186,38 @@ def drawArm(x1, x2, y, width=5, color="#003050"):
 
 ## ---------------------------- ##
 
+
+t = turtle;
+mybox = Card((0,0),0,0)
+
+def printTreeGraphic(brotherList):
+    t = turtle.Turtle()
+    setRoot()
+    distX = 110
+    distY = 110
+    global mybox
+    for b in brotherList:
+        mybox = Card((b.column*distX,150-(b.row*distY)), 180, 60)
+        if b.status == 1:
+            mybox.setColor("#00a0df")
+            mybox.setTextColor("white")
+        else:
+            mybox.setColor("white")
+            mybox.setTextColor("black")
+            
+        mybox.setTilt(30)
+        mybox.drawCard(b)
+
+
+    ## Save ##
+    #t.getscreen().getcanvas().postscript(file = "t1.eps")
+
+    ## END ##
+    turtle.done()
+    return
+
 ## Execute ##
+'''
 r4 = Brother(4,0,0,0,0,0,4,"Nick Pillon")
 r33 = Brother(4,1,0,0,0,0,33,"Chad Rossi")
 r40 = Brother(4,2,-2,0,0,3,40,"Vinay Kaushik")
@@ -193,28 +227,7 @@ r56 = Brother(4,3,0,2,1,5,56,"Michael Yaeger")
 r60 = Brother(4,3,2,2,1,6,60,"Riley Miskewitz")
 r76 = Brother(4,3,4,2,0,8,76,"Rahul Sharma")
 r67 = Brother(4,4,0,0,1,7,67,"Tim Doores")
-t4 = [r4, r33, r40, r49, r43, r56, r60, r76, r67]
+brotherList = [r4, r33, r40, r49, r43, r56, r60, r76, r67]
 
-t = turtle.Turtle()
-setRoot()
-distX = 110
-distY = 110
-
-for b in t4:
-    mybox = Card((b.column*distX,150-(b.row*distY)), 180, 60)
-    if b.status == 1:
-        mybox.setColor("#00a0df")
-        mybox.setTextColor("white")
-    else:
-        mybox.setColor("white")
-        mybox.setTextColor("black")
-        
-    mybox.setTilt(30)
-    mybox.drawCard(b)
-
-
-## Save ##
-#t.getscreen().getcanvas().postscript(file = "t1.eps")
-
-## END ##
-turtle.done()
+printTreeGraphic(brotherList);
+'''
