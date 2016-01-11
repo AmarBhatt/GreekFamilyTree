@@ -2,6 +2,7 @@ import csv
 from FamilyTree import *
 import operator
 from math import floor
+import os
 
 ## Classes ##
 '''
@@ -151,7 +152,8 @@ formatTree(NODE, INTEGER)
 
 Formats tree for printing
 
-Parameters: Node to format, INTEGER tree number, INTEGER current row
+Parameters: Node to format, INTEGER tree number, INTEGER current row,
+            INTEGER column, INTEGER bigColumn
 '''  
 def formatTree(n,t,row,column,bigColumn):
     #tree, row, column, bigColumn, status, pledgeClass, roll, name
@@ -169,7 +171,46 @@ def formatTree(n,t,row,column,bigColumn):
         formatTree(c, t, row+1, col, bigColumn)
     return brotherList;
 
-              
+'''
+checkTree()
+
+Checks current tree (from brothersList) for overlap, informs user of any error
+
+Parameters: NONE
+
+'''
+def checkTree():
+    index = 1;
+    for b in brotherList:
+        for c in brotherList[index:]:
+            if(b.row == c.row):
+                if(b.column == c.column or abs(b.column - c.column) < 2):
+                    print("ERROR: overlap in tree "+str(b.tree)+" row "+str(b.row)+": " + b.name+"("+str(b.roll)+")" +","+c.name+"("+str(c.roll)+")")
+        index = index + 1
+        if(index == len(brotherList)):
+            break
+            
+'''
+saveTree()
+
+Saves current tree (from brothersList) to .tsv
+
+Parameters: NONE
+
+'''
+def saveTree():
+    num = brotherList[0].tree
+    filename = str(num) + ".tsv"
+    if(os.path.isfile(filename)):
+        os.remove(filename)
+    with open(filename,'wt') as csvfile:
+        writer = csv.writer(csvfile, delimiter='\t')
+        for brother in brotherList:
+            writer.writerow([brother.tree, brother.row, brother.column,
+                             brother.bigColumn, brother.status, brother.pledgeClass,
+                             brother.roll, brother.name])             
+
+
 
 '''
 main()
@@ -180,22 +221,59 @@ Parameters: NONE
 
 '''   
 def main():
+    validInput = False
     readRoll('Roll - Brothers.tsv')
-    print(memberLookup)
+    #print(memberLookup)
     count = 1
     global brotherList
-    for h in getHeads():
-        populateTree(h)
-        print("Tree ",count,": ",memberLookup.get(h.data).name)
-        printTree(h)
+    heads = getHeads()
+    print("Choose which tree to print:")
+    index = 1
+    for h in heads:
+        print(str(index)+". "+memberLookup.get(h.data).name)
+        index = index + 1
+    print(str(index)+". "+"ALL")
+    while(not(validInput)):
+        selection = input("Enter tree number: ")
+        if(selection.isdigit()):
+            selIndex = int(selection) - 1
+            if(selIndex > -1 and selIndex <= len(heads)):
+                validInput = True
+            else:
+                print("INVALID ENTRY")
+        else:
+            print("INVALID ENTRY")
+    
+    if(selIndex == len(heads)): #All was selected
+        for h in getHeads():
+            populateTree(h)
+            print("Tree ",count,": ",memberLookup.get(h.data).name)
+            printTree(h)
+            print()
+            brotherList = []
+            brotherList = formatTree(h,count,0,0,0)
+            brotherList.sort(key=operator.attrgetter('row'))
+            print("Printing Tree: ",count);
+            checkTree()
+            saveTree()
+            printTreeGraphic(brotherList);
+            count+=1
+    else:        
+        n = heads[selIndex]
+        populateTree(n)
+        print("Tree ",selection,": ",memberLookup.get(n.data).name)
+        printTree(n)
         print()
-        brotherList = [];
-        brotherList = formatTree(h,count,0,0,0);
+        brotherList = []                
+        brotherList = formatTree(n,selIndex+1,0,0,0);
         brotherList.sort(key=operator.attrgetter('row'))
-        print("Printing Tree: ",count);
-        print(brotherList);
-        printTreeGraphic(brotherList);
-        count+=1
+        print("Printing Tree: ",selIndex + 1);
+        checkTree()
+        saveTree()
+        printTreeGraphic(brotherList)
+                
+                
+                
                 
 
 main()
