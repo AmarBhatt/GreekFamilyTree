@@ -1,0 +1,604 @@
+<html>
+<head>
+  <style>
+    .node {
+      position: absolute;
+      background-color: #0000cc;
+      color: #ffffff;
+      font-size: 12px;
+      font-family: sans-serif;
+      text-align: center;
+      vertical-align: middle;
+      border: 1px solid #000088;
+    }
+
+    .dot {
+      position: absolute;
+      background-color: black;
+      width: 1px;
+      height: 1px;
+      overflow:hidden;
+    }
+  </style>
+  <script>
+
+    var node_size = 100
+    var horizontal_gap = 16
+    var vertical_gap = 32
+
+    // Draw a graph node.
+    function node(lbl, x, y, sz) {
+      if (!sz) sz = node_size
+      var h = sz / 2
+      document.write('<div class="node" style="left:' + (x - h) + 'px;top:' + (y - h) +
+          'px;width:' + sz + 'px;height:' + sz + 'px;line-height:' + sz +
+          'px;">' + lbl + '</div>')
+    }
+
+    // Draw a 1-pixel black dot.
+    function dot(x, y) {
+
+      var d1 = document.getElementById('tree_space');
+      d1.innerHTML += '<div class="dot" style="left:' + x + 'px;top:' + y + 'px;"></div>';
+
+      //document.write('<div class="dot" style="left:' + x + 'px;top:' + y + 'px;"></div>')
+    }
+
+    // Draw a line between two points.  Slow but sure...
+    function arc(x0, y0, x1, y1) {
+      var dx = x1 - x0
+      var dy = y1 - y0
+      var x = x0
+      var y = y0
+      if (abs(dx) > abs(dy)) {
+        var yinc = dy / dx
+        if (dx < 0)
+          while (x >= x1) { dot(x, y); --x; y -= yinc }
+        else
+          while (x <= x1) { dot(x, y); ++x; y += yinc }
+      }
+      else {
+        var xinc = dx / dy
+        if (dy < 0)
+          while (y >= y1) { dot(x, y); --y; x -= xinc }
+        else
+          while (y <= y1) { dot(x, y); ++y; x += xinc }
+      }
+    }
+
+    // Tree node.
+    function Tree(lbl, children) {
+      this.lbl = lbl
+      this.children = children ? children : []
+      // This will be filled with the x-offset of this node wrt its parent.
+      this.offset = 0
+      // Optional coordinates that can be written by place(x, y)
+      this.x = 0
+      this.y = 0
+    }
+
+    Tree.prototype.is_leaf = function() { return this.children.length == 0 }
+
+    // Label the tree with given root (x,y) coordinates using the offset
+    // information created by extent().
+    Tree.prototype.place = function(x, y) {
+      var n_children = this.children.length
+      var y_children = y + vertical_gap + node_size
+      for (var i = 0; i < n_children; i++) {
+        var child = this.children[i]
+        child.place(x + child.offset, y_children)
+      }
+      this.x = x
+      this.y = y
+    }
+
+    // Draw the tree after it has been labeled w ith extent() and place().
+    Tree.prototype.draw = function () {
+      var n_children = this.children.length
+      for (var i = 0; i < n_children; i++) {
+        var child = this.children[i]
+        arc(this.x, this.y + 0.5 * node_size + 2, child.x, child.y - 0.5 * node_size)
+        child.draw()
+      }
+      node(this.lbl, this.x, this.y)
+    }
+
+    // Recursively assign offsets to subtrees and return an extent
+    // that gives the shape of this tree.
+    //
+    // An extent is an array of left-right x-coordinate ranges,
+    // one element per tree level.  The root of the tree is at
+    // the origin of its coordinate system.
+    //
+    // We merge successive extents by finding the minimum shift
+    // to the right that will cause the extent being merged to
+    // not overlap any of the previous ones.
+    Tree.prototype.extent = function() {
+      var n_children = this.children.length
+
+      // Get the extents of the children
+      var child_extents = []
+      for (var i = 0; i < n_children; i++)
+        child_extents.push(this.children[i].extent())
+
+      // Compute a minimum non-overlapping x-offset for each extent
+      var rightmost = []
+      var offset = 0
+      for (i = 0; i < n_children; i++) {
+        var ext = child_extents[i]
+        // Find the necessary offset.
+        offset = 0
+        for (var j = 0; j < min(ext.length, rightmost.length); j++)
+          offset = max(offset, rightmost[j] - ext[j][0] + horizontal_gap)
+        // Update rightmost
+        for (var j = 0; j < ext.length; j++)
+          if (j < rightmost.length)
+            rightmost[j] = offset + ext[j][1]
+          else
+            rightmost.push(offset + ext[j][1])
+        this.children[i].offset = offset
+      }
+      rightmost = null  // Gc, come get it.
+
+      // Center leaves between non-leaf siblings with a tiny state machine.
+      // This is optional, but eliminates a minor leftward skew in appearance.
+      var state = 0
+      var i0 = 0
+      for (i = 0; i < n_children; i++) {
+        if (state == 0) {
+          state = this.children[i].is_leaf() ? 3 : 1
+        } else if (state == 1) {
+          if (this.children[i].is_leaf()) {
+            state = 2
+            i0 = i - 1 // Found leaf after non-leaf. Remember the non-leaf.
+          }
+        } else if (state == 2) {
+          if (!this.children[i].is_leaf()) {
+            state = 1  // Found matching non-leaf. Reposition the leaves between.
+            var dofs = (this.children[i].offset - this.children[i0].offset) / (i - i0)
+            offset = this.children[i0].offset
+            for (j = i0 + 1; j < i; j++)
+              this.children[j].offset = (offset += dofs)
+          }
+        } else {
+          if (!this.children[i].is_leaf()) state = 1
+        }
+      }
+
+      // Adjust to center the root on its children
+      for (i = 0; i < n_children; i++)
+        this.children[i].offset -= 0.5 * offset
+
+      // Merge the offset extents of the children into one for this tree
+      var rtn = [ [-0.5 * node_size, 0.5 * node_size] ]
+      // Keep track of subtrees currently on left and right edges.
+      var lft = 0
+      var rgt = n_children - 1
+      i = 0
+      for (i = 0; lft <= rgt; i++) {
+        while (lft <= rgt && i >= child_extents[lft].length) ++lft
+        while (lft <= rgt && i >= child_extents[rgt].length) --rgt
+        if (lft > rgt) break
+        var x0 = child_extents[lft][i][0] + this.children[lft].offset
+        var x1 = child_extents[rgt][i][1] + this.children[rgt].offset
+        rtn.push([x0, x1])
+      }
+      return rtn
+    }
+
+    // Return what the bounding box for the tree would be if it were drawn at (0,0).
+    // To place it at the upper left corner of a div, draw at (-bb[0], -bb[1])
+    // The box is given as [x_left, y_top, width, height]
+    function bounding_box(extent) {
+      var x0 = extent[0][0]
+      var x1 = extent[0][1]
+      for (var i = 1; i < extent.length; i++) {
+        x0 = min(x0, extent[i][0])
+        x1 = max(x1, extent[i][1])
+      }
+      return [x0, -0.5 * node_size, x1 - x0, (node_size + vertical_gap) * extent.length - vertical_gap ]
+    }
+
+    function min(x, y) { return x < y ? x : y }
+    function max(x, y) { return x > y ? x : y }
+    function abs(x) { return x < 0 ? -x : x }
+
+    // Generate a random tree with given depth and minimum number of children of the root.
+    // The min_children field is optional.  Use e.g. 2 to avoid trivial trees.
+    var node_label = 0
+    function random_tree(depth, min_children) {
+      var n_children = depth <= 1 || Math.random() < 0.5 ? 0 : Math.round(Math.random() * 4)
+      if (min_children) n_children = max(n_children, min_children)
+      var children = []
+      for (var i = 0; i < n_children; i++)
+        children.push(random_tree(depth - 1, min_children - 1))
+      return new Tree('' + node_label++, children)
+    }
+
+
+
+    function member(big, bigRoll, status, pledgeClass, roll, name){
+        this.roll = roll
+        this.bigRoll = bigRoll
+        this.name = name
+        this.big = big
+        this.status = status
+        this.pledgeClass = pledgeClass
+      }
+    member.prototype.toString = function(){
+        console.log(''+this.roll + "\t" + this.name + "\t" + this.status + "\t" + this.pledgeClass + "\t" + this.big + "\t" + this.bigRoll)
+      }
+
+      // Draw a graph node.
+    function t_node(n, x, y, sz) {
+      if (!sz) sz = node_size
+      var h = sz / 2
+      var bro = memberLookup[n];
+      var d1 = document.getElementById('tree_space');
+      d1.innerHTML += '<div class="node" style="left:' + (x - h) + 'px;top:' + (y - h) +  'px;width:' + sz + 'px;height:' + sz + 'px;line-height:' + sz + 'px;">' + bro.name + ' ' + bro.roll + '</div>';
+      // document.write('<div class="node" style="left:' + (x - h) + 'px;top:' + (y - h) +
+      //     'px;width:' + sz + 'px;height:' + sz + 'px;line-height:' + sz +
+      //     'px;">' + bro.name + '</div>')
+    }
+
+     function bro_node(head, child, data){
+        this.head = head
+        this.child = child
+        this.data = data
+      }
+    bro_node.prototype.addChild = function(c){
+        this.child.push(c)
+      }
+    bro_node.prototype.toString = function(){
+        print(''+this.data + this.head + this.child)
+      }
+
+      bro_node.prototype.is_leaf = function() { return this.child.length == 0 }
+
+    // Label the tree with given root (x,y) coordinates using the offset
+    // information created by extent().
+    bro_node.prototype.place = function(x, y) {
+      var n_children = this.child.length
+      var y_children = y + vertical_gap + node_size
+      for (var i = 0; i < n_children; i++) {
+        var child = this.child[i]
+        child.place(x + child.offset, y_children)
+      }
+      this.x = x
+      this.y = y
+    }
+
+    // Draw the tree after it has been labeled w ith extent() and place().
+    bro_node.prototype.draw = function () {
+      var n_children = this.child.length
+      for (var i = 0; i < n_children; i++) {
+        var child = this.child[i]
+        arc(this.x, this.y + 0.5 * node_size + 2, child.x, child.y - 0.5 * node_size)
+        child.draw()
+      }
+      t_node(this.data, this.x, this.y)
+    }
+
+    // Recursively assign offsets to subtrees and return an extent
+    // that gives the shape of this tree.
+    //
+    // An extent is an array of left-right x-coordinate ranges,
+    // one element per tree level.  The root of the tree is at
+    // the origin of its coordinate system.
+    //
+    // We merge successive extents by finding the minimum shift
+    // to the right that will cause the extent being merged to
+    // not overlap any of the previous ones.
+    bro_node.prototype.extent = function() {
+      var n_children = this.child.length
+
+      // Get the extents of the children
+      var child_extents = []
+      for (var i = 0; i < n_children; i++)
+        child_extents.push(this.child[i].extent())
+
+      // Compute a minimum non-overlapping x-offset for each extent
+      var rightmost = []
+      var offset = 0
+      for (i = 0; i < n_children; i++) {
+        var ext = child_extents[i]
+        // Find the necessary offset.
+        offset = 0
+        for (var j = 0; j < min(ext.length, rightmost.length); j++)
+          offset = max(offset, rightmost[j] - ext[j][0] + horizontal_gap)
+        // Update rightmost
+        for (var j = 0; j < ext.length; j++)
+          if (j < rightmost.length)
+            rightmost[j] = offset + ext[j][1]
+          else
+            rightmost.push(offset + ext[j][1])
+        this.child[i].offset = offset
+      }
+      rightmost = null  // Gc, come get it.
+
+      // Center leaves between non-leaf siblings with a tiny state machine.
+      // This is optional, but eliminates a minor leftward skew in appearance.
+      var state = 0
+      var i0 = 0
+      for (i = 0; i < n_children; i++) {
+        if (state == 0) {
+          state = this.child[i].is_leaf() ? 3 : 1
+        } else if (state == 1) {
+          if (this.child[i].is_leaf()) {
+            state = 2
+            i0 = i - 1 // Found leaf after non-leaf. Remember the non-leaf.
+          }
+        } else if (state == 2) {
+          if (!this.child[i].is_leaf()) {
+            state = 1  // Found matching non-leaf. Reposition the leaves between.
+            var dofs = (this.child[i].offset - this.child[i0].offset) / (i - i0)
+            offset = this.child[i0].offset
+            for (j = i0 + 1; j < i; j++)
+              this.child[j].offset = (offset += dofs)
+          }
+        } else {
+          if (!this.child[i].is_leaf()) state = 1
+        }
+      }
+
+      // Adjust to center the root on its children
+      for (i = 0; i < n_children; i++)
+        this.child[i].offset -= 0.5 * offset
+
+      // Merge the offset extents of the children into one for this tree
+      var rtn = [ [-0.5 * node_size, 0.5 * node_size] ]
+      // Keep track of subtrees currently on left and right edges.
+      var lft = 0
+      var rgt = n_children - 1
+      i = 0
+      for (i = 0; lft <= rgt; i++) {
+        while (lft <= rgt && i >= child_extents[lft].length) ++lft
+        while (lft <= rgt && i >= child_extents[rgt].length) --rgt
+        if (lft > rgt) break
+        var x0 = child_extents[lft][i][0] + this.child[lft].offset
+        var x1 = child_extents[rgt][i][1] + this.child[rgt].offset
+        rtn.push([x0, x1])
+      }
+      return rtn
+    }
+
+
+
+      filterOutMember = ['S','D'] //Filter list for Sweethearts (Sx) and Dogs (Dx)
+
+      setStatus = {"Active":1,"Alumni":0,"Disassociated":2, "Transferred/ Left School":1} //status dictionary
+
+      memberLookup = {}//dictionary mapping roll number to member object
+
+      nodeList = [] //List of nodes (trees)
+
+      memberDict = {} //dictionary mapping littles to bigs by roll number
+
+      colonyMap = {"Colony":0,
+      "Alpha":1,
+      "Beta":2,
+      "Gamma":3,
+      "Delta":4,
+      "Epsilon":5,
+      "Zeta":6,
+      "Eta":7,
+      "Theta":8,
+      "Iota":9,
+      "Kappa":10,
+      "Georgia Tech":0}
+
+      brotherList = [];
+
+
+      /*
+      readRoll(STRING)
+
+      Opens external .csv file to read Roll.  Creates member objects from Roll information.
+
+      Parameters: Roll - STRING - file name of roll csv
+      */
+// function readRoll(Roll):
+//     with open(Roll, newline='') as csvfile: # open file
+//         reader = csv.reader(csvfile, delimiter='\t') # Split comma seperated values
+//         count = 0 
+//         nodeList = []
+//         for row in reader:
+//             if count != 0: # skip first row for column headers
+//                 if (not row[0][0] in filterOutMember):
+//                      row[2] = setStatus.get(row[2]) #set status of member
+//                      if(row[15] == "N/A"): # if empty string then no Big present for member
+//                          row[15] = -1;
+//                      n = member(row[5],int(row[15]),row[2],row[7],int(row[0]),row[1]) #create object
+//                      #set dictionary look ups
+//                      memberLookup[int(row[0])] = n
+//                      memberDict[int(row[0])]=int(row[15])
+//                      n.toString()
+//             count = count + 1 #just to skip first one
+
+
+    function Upload() {
+    var fileUpload = document.getElementById("fileUpload");
+    var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.tsv|.txt)$/;
+    if (regex.test(fileUpload.value.toLowerCase())) {
+        if (typeof (FileReader) != "undefined") {
+            count = 0;
+            nodeList = [];
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var table = document.createElement("table");
+                var rows = e.target.result.split("\n");
+                for (var i = 0; i < rows.length; i++) {
+                    if (count != 0){
+                      var row = table.insertRow(-1);
+                      var cells = rows[i].split("\t");
+                      for (var j = 0; j < cells.length; j++) {
+                         var cell = row.insertCell(-1);
+                         cell.innerHTML = cells[j];
+                      }
+
+                      if(filterOutMember.indexOf(cells[0][0]) == -1){
+                        cells[2] = setStatus[cells[2]];
+                        if(cells[15] == "N/A"){
+                          cells[15] = -1;
+                        }
+                        n = new member(cells[5],parseInt(cells[15]),cells[2],cells[7],parseInt(cells[0]),cells[1]);
+                        memberLookup[parseInt(cells[0])] = n;
+                        memberDict[parseInt(cells[0])] = parseInt(cells[15]);
+                        //n.toString();
+                      }
+
+
+                    }
+                    count++; 
+                }
+                // var dvCSV = document.getElementById("dvCSV");
+                // dvCSV.innerHTML = "";
+                // dvCSV.appendChild(table);
+            }
+            reader.readAsText(fileUpload.files[0]);
+            heads = getHeads();
+            for(var h in heads){//heads.length
+              populateTree(heads[h],[])
+              console.log(heads[h])
+              console.log("Tree "+h+": ",memberLookup[heads[h].data].name)
+              printTree(heads[h])
+              console.log("");
+            }
+            generateTree(heads[6]);
+        } else {
+            alert("This browser does not support HTML5.");
+        }
+    } else {
+        alert("Please upload a valid CSV file.");
+    }
+}
+
+
+function generateTree(n){
+  // Generate a random tree.
+    //tree = random_tree(10, 2)
+    //var d1 = document.getElementById('tree_space');
+    //d1.insertAdjacentHTML('beforebegin', '<div style="width:1000px;height:800px">');
+    tree = n
+
+    // Label it with node offsets and get its extent.
+    e = tree.extent()
+
+    // Retrieve a bounding box [x,y,width,height] from the extent.
+    bb = bounding_box(e)
+
+    // Label each node with its (x,y) coordinate placing root at given location.
+    tree.place(-bb[0] + horizontal_gap, -bb[1] + horizontal_gap)
+
+    // Draw using the labels.
+    tree.draw()
+    //d1.insertAdjacentHTML('beforeend', '</div>');
+}
+
+function getHeads(){
+    //heads = [brother for brother, big in memberDict.items() if big == -1]
+    heads = [];
+    for(i=0;i<19;i++){
+      if(memberDict[i]==-1){
+        heads.push(i);
+      }
+    }
+    for(i=0;i<heads.length;i++){
+        heads[i] = new bro_node(null, [], heads[i])
+      }
+    return heads
+
+}
+
+function populateTree(n,children) {
+    //children = [brother for brother, big in memberDict.items() if big == n.data]
+    //children = [];
+    for(var bro in memberDict){
+      if(memberDict[bro]==n.data){
+        children.push(bro);
+      }
+    }
+
+    if (children == []){
+        return
+    }
+
+    for(var c in children){
+        //console.log(c);
+        ch = new bro_node(n,[],children[c])
+        n.child.push(ch);
+        populateTree(ch,[]);
+    }
+}
+
+function printTree(n){
+    console.log(memberLookup[n.data].name + "->")
+    if (n.child == []){
+        return
+      }
+    for(var c in n.child){
+        printTree(n.child[c])
+    }
+  }
+
+
+
+    function set_tree(){
+
+      t1 = new Tree("Tyler Pixley",[])
+      t2 = new Tree("Derek Pixley",[])
+      t3 = new Tree("Alex Skinner",[])
+      t4 = new Tree("Michael Lutfring",[])
+      t5 = new Tree("Patrick Furrey",[])
+      t6 = new Tree("Andrew Ward",[])
+      t7 = new Tree("Ariel Tejada",[])
+      t8 = new Tree("Amar Bhatt",[])
+      t9 = new Tree("Asa Snyder",[])
+      t10 = new Tree("Shane Peechtaka",[])
+
+      t7.children.push(t10)
+      t6.children.push(t9)
+      t3.children.push(t5)
+      t3.children.push(t6)
+      t4.children.push(t7)
+      t4.children.push(t8)
+      t2.children.push(t4)
+      t1.children = [t2,t3]
+
+      return t1
+    }
+
+
+
+
+  </script>
+</head>
+<body>
+
+<div id="tree_space" style="width:1000px;height:800px">
+<!--<div style="width:1000px;height:800px">-->
+  <script>
+    // Generate a random tree.
+    //tree = random_tree(10, 2)
+        //tree = set_tree()
+
+    // Label it with node offsets and get its extent.
+        //e = tree.extent()
+
+    // Retrieve a bounding box [x,y,width,height] from the extent.
+        //bb = bounding_box(e)
+
+    // Label each node with its (x,y) coordinate placing root at given location.
+          //tree.place(-bb[0] + horizontal_gap, -bb[1] + horizontal_gap)
+
+    // Draw using the labels.
+          //tree.draw()
+
+  </script>
+</div>
+<input type="file" id="fileUpload" />
+<input type="button" id="upload" value="Upload" onClick="Upload()" />
+<hr />
+<div id="dvCSV">
+</body>
+</html>
